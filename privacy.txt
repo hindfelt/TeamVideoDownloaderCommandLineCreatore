@@ -1,0 +1,21 @@
+Privacy Policy
+Effective Date: [Insert Date]
+
+1. Introduction
+This privacy policy explains how our Chrome extension (the "Extension") handles user data. We take privacy seriously and are committed to ensuring transparency regarding data collection and usage.
+
+2. Data Collection and Usage
+Our Extension does not collect, store, or transmit any personal data. The only function of the Extension is to extract the URL of the website a user visits and copy it to their local clipboard. This allows users to paste the URL into other applications.
+
+3. Data Storage and Sharing
+The Extension does not store any data.
+The Extension does not send any data to external servers, third parties, or cloud storage.
+All operations are performed locally on the user's device.
+4. Permissions
+The Extension requires minimal permissions to function properly. The activeTab permission is used to read the URL of the currently active tab so it can be copied to the clipboard.
+
+5. Security
+Since our Extension does not collect or transmit any data, there is no risk of data breaches or leaks related to its functionality.
+
+6. Changes to This Privacy Policy
+We may update this Privacy Policy from time to time. If there are any significant changes, we will update the Effective Date above.
