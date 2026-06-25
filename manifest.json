@@ -3,9 +3,6 @@
   "name": "Teams Recording Downloader",
   "version": "2.1",
   "description": "Download Microsoft Teams / SharePoint Stream meeting recordings (in-browser, decrypts AES-128 segments).",
-  "permissions": [
-    "storage"
-  ],
   "host_permissions": [
     "https://*.sharepoint.com/*",
     "https://*.svc.ms/*",

@@ -56,18 +56,16 @@ This extension handles the whole pipeline:
 When a recording is detected, a floating **⬇ Download recording** button appears
 in the bottom-right of the page with live progress.
 
-### Fallbacks
+### Fallback
 
-The toolbar popup also offers two clipboard helpers for when you'd rather use a
-terminal:
+`destream.py` is a standalone Python downloader/decryptor for fully manual use —
+it parses a saved manifest, fetches the key, downloads + decrypts the segments,
+and muxes with ffmpeg. See the header of that file for usage.
 
-- **Copy ffmpeg Command** — builds an `ffmpeg` command with the captured
-  auth headers (cookies/authorization) baked in.
-- **Copy yt-dlp Command** — builds a `yt-dlp --cookies-from-browser chrome`
-  command for the recording page.
-
-`destream.py` is a standalone Python downloader/decryptor for fully manual use
-(see the header of that file for usage).
+> The repo also contains `popup.*` and `background.js` with `ffmpeg`/`yt-dlp`
+> command-builder helpers and auth-header capture. These are **not part of the
+> published build** (not wired into `manifest.json`); the published extension is
+> the in-page overlay path only.
 
 ## Limitations
 
@@ -102,24 +100,31 @@ Install the published listing, then pin it from the extensions menu.
 
 ## File structure
 
+Published build:
+
 ```
 ├── manifest.json     # MV3 extension config
 ├── intercept.js      # page (MAIN) world: hooks fetch, captures manifest + token
 ├── content.js        # isolated world: DASH parse, download, decrypt, orchestrate
 ├── mux-worker.js     # Web Worker: fMP4 → flat MP4 remuxer
-├── background.js     # service worker: captures manifest URL + auth headers/cookies
+└── icons/            # team_lit.png / team_unlit.png
+```
+
+Also in the repo, but not part of the published build:
+
+```
+├── background.js     # service worker: manifest URL + auth header/cookie capture
 ├── popup.html        # toolbar popup UI
 ├── popup.js          # ffmpeg / yt-dlp command builders
-├── destream.py       # standalone Python downloader/decryptor (manual fallback)
-└── icons/            # team_lit.png / team_unlit.png
+└── destream.py       # standalone Python downloader/decryptor (manual fallback)
 ```
 
 ## Permissions
 
-- `storage` — extension state.
-- Host access to `*.sharepoint.com`, `*.svc.ms`, `teams.microsoft.com`, and
-  `teams.cloud.microsoft` — to read the recording pages and fetch the media
-  segments and decryption key.
+The published build requests **no API permissions** — only host access to
+`*.sharepoint.com`, `*.svc.ms`, `teams.microsoft.com`, and
+`teams.cloud.microsoft`, so the content script can run on the recording pages and
+fetch the media segments and decryption key.
 
 ## Credits
 
