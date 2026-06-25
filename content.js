@@ -15,6 +15,7 @@
   let videoSpopActoken = null;
   let downloading = false;
   const concurrency = 4; // global in-flight segment budget; SharePoint throttles in the low teens
+  const isTopFrame = window.top === window.self;
 
   // --- receive captures from the page-world interceptor ---
   window.addEventListener('message', (event) => {
@@ -23,8 +24,24 @@
       videoManifestUrl = event.data.manifestUrl;
       if (event.data.spopactoken) videoSpopActoken = event.data.spopactoken;
       showButton();
+      // If the recording lives in a child frame, this frame renders its own
+      // (working) button — tell the top frame to drop its placeholder so the
+      // user doesn't see two buttons.
+      if (!isTopFrame) {
+        try { chrome.runtime.sendMessage({ type: 'recordingFrameReady' }); } catch (_) {}
+      }
     }
   });
+
+  // The top frame's placeholder hides itself once a child frame reports it owns
+  // the real recording (and only while the top frame hasn't captured its own).
+  try {
+    chrome.runtime.onMessage.addListener((request) => {
+      if (request && request.type === 'hidePlaceholderButton' && isTopFrame && !videoManifestUrl) {
+        hideButton();
+      }
+    });
+  } catch (_) { /* chrome.runtime may be unavailable in some sandboxed frames */ }
 
   function svcMsFetchInit(extra) {
     const init = Object.assign({}, extra || {});
@@ -368,6 +385,9 @@
     injectButton();
     if (btn) btn._wrap.style.display = 'flex';
   }
+  function hideButton() {
+    if (btn) btn._wrap.style.display = 'none';
+  }
   function setStatus(text) {
     if (!statusEl) return;
     statusEl.textContent = text;
@@ -398,9 +418,17 @@
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', injectButton);
-  } else {
+  // Surface the overlay button in the top frame immediately, before any
+  // manifest is captured. Clicking it before playback prompts the user to play
+  // the recording first; once a manifest is seen (here or in a child frame) the
+  // button is wired to the real download.
+  function ready() {
     injectButton();
+    if (isTopFrame) showButton();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ready);
+  } else {
+    ready();
   }
 })();

@@ -70,6 +70,20 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === 'recordingFrameReady') {
+    // A child frame captured the recording — tell the tab's top frame to hide
+    // its placeholder button so only the child's working button is shown.
+    const tabId = sender.tab?.id;
+    if (typeof tabId === 'number' && sender.frameId !== 0) {
+      chrome.tabs.sendMessage(
+        tabId,
+        { type: 'hidePlaceholderButton' },
+        { frameId: 0 },
+        () => void chrome.runtime.lastError
+      );
+    }
+    return; // no response needed
+  }
   if (request.type === 'getManifest') {
     const tabId = request.tabId ?? sender.tab?.id;
     // Prefer the tab-specific capture; fall back to the most recent one
