@@ -1,81 +1,108 @@
-# Teams Recording Downloader Chrome Extension
+# Teams Recording Downloader
 
-A Chrome extension that helps you download Microsoft Teams meeting recordings by extracting the video manifest URL and generating the appropriate ffmpeg command.
-Ofc you must have FFMPEG to then run the command.
+A Chrome (Manifest V3) extension that downloads your Microsoft Teams / SharePoint
+Stream meeting recordings **entirely in the browser** — including the AES-128
+encryption Microsoft now applies to the media segments. No command line required
+for the common case; an ffmpeg/yt-dlp fallback and a standalone Python script are
+included for the cases where it isn't enough.
 
-## Features
+## What it does
 
-- Automatically detects Teams meeting recording pages
-- Extracts video manifest URLs from Teams recordings
-- Generates ready-to-use ffmpeg commands
-- Copies commands to clipboard with one click
-- Provides visual feedback when a manifest URL is detected
+Modern Teams/Stream recordings are served as MPEG-DASH with **DASH-SEA
+(`urn:mpeg:dash:sea`) AES-128-CBC "clear-key" encryption**. The AES key is
+fetched over HTTP and the media CDN (`*.svc.ms`) is authorized with a short-lived
+`x-spopactoken` bearer header that the OnePlayer's service worker sends — a header
+the extension `webRequest` API can't see. ffmpeg and yt-dlp can't decrypt this
+scheme on their own.
 
-## Prerequisites
+This extension handles the whole pipeline:
 
-- Google Chrome browser
-- ffmpeg installed on your system (for actual video downloading)
+1. **Intercept** — a page-world script hooks `window.fetch` to capture the DASH
+   `videomanifest` URL and the `x-spopactoken` as the player requests them.
+2. **Download** — the content script parses the DASH manifest, then downloads the
+   audio and video segments in parallel (with retry/back-off for SharePoint's
+   throttling).
+3. **Decrypt** — encrypted segments are decrypted in-browser with the Web Crypto
+   API (AES-128-CBC), using the key fetched from the manifest's key endpoint.
+4. **Mux** — a Web Worker remuxes the fragmented audio + video into a single flat
+   (non-fragmented) MP4 that seeks correctly in VLC/QuickTime, off the UI thread.
+5. **Save** — the finished `.mp4` is dropped straight into your Downloads.
+
+When a recording is detected, a floating **⬇ Download recording** button appears
+in the bottom-right of the page with live progress.
+
+### Fallbacks
+
+The toolbar popup also offers two clipboard helpers for when you'd rather use a
+terminal:
+
+- **Copy ffmpeg Command** — builds an `ffmpeg` command with the captured
+  auth headers (cookies/authorization) baked in.
+- **Copy yt-dlp Command** — builds a `yt-dlp --cookies-from-browser chrome`
+  command for the recording page.
+
+`destream.py` is a standalone Python downloader/decryptor for fully manual use
+(see the header of that file for usage).
+
+## Limitations
+
+- **Hard DRM is not supported.** Recordings protected with Widevine, PlayReady,
+  or FairPlay cannot be decrypted client-side and are detected and skipped.
+- Auth tokens are short-lived. If a download fails with 401/expired, refresh the
+  recording page, play it for a few seconds, and try again.
 
 ## Installation
 
-### Development Installation
+### From source (developer mode)
+
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/teams-recording-downloader.git
+   git clone https://github.com/hindfelt/TeamVideoDownloaderCommandLineCreatore.git
    ```
+2. Open Chrome and go to `chrome://extensions/`.
+3. Enable **Developer mode** (top-right).
+4. Click **Load unpacked** and select the project directory.
 
-2. Open Chrome and navigate to `chrome://extensions/`
+### From the Chrome Web Store
 
-3. Enable "Developer mode" in the top right corner
-
-4. Click "Load unpacked" and select the extension directory
-
-### Manual Installation
-1. Download the latest release from the releases page
-2. Follow steps 2-4 from the Development Installation section
+Install the published listing, then pin it from the extensions menu.
 
 ## Usage
 
-1. Navigate to a Teams meeting recording in your browser
+1. Open a Teams/SharePoint Stream recording and **play it for a few seconds** so
+   the player requests the manifest.
+2. Click the **⬇ Download recording** button that appears bottom-right (or use the
+   toolbar popup's copy buttons as a fallback).
+3. Watch the progress; the `.mp4` lands in your Downloads when muxing finishes.
 
-2. When the extension icon becomes active (lit up), click it
-
-3. Click the "Copy ffmpeg Command" button in the popup
-
-4. Open your terminal/command prompt
-
-5. Paste and run the copied ffmpeg command to download the recording
-
-## File Structure
+## File structure
 
 ```
-└── extension/
-    ├── manifest.json         # Extension configuration
-    ├── popup.html           # Popup interface
-    ├── popup.js            # Popup functionality
-    ├── content.js          # Content script for URL detection
-    ├── background.js       # Background service worker
-    └── icons/              # Extension icons
-        ├── teams_lit.png
-        └── teams_unlit.png
+├── manifest.json     # MV3 extension config
+├── intercept.js      # page (MAIN) world: hooks fetch, captures manifest + token
+├── content.js        # isolated world: DASH parse, download, decrypt, orchestrate
+├── mux-worker.js     # Web Worker: fMP4 → flat MP4 remuxer
+├── background.js     # service worker: captures manifest URL + auth headers/cookies
+├── popup.html        # toolbar popup UI
+├── popup.js          # ffmpeg / yt-dlp command builders
+├── destream.py       # standalone Python downloader/decryptor (manual fallback)
+└── icons/            # team_lit.png / team_unlit.png
 ```
 
-## Technical Details
+## Permissions
 
-The extension works by:
-1. Monitoring network requests for video manifest URLs
-2. Using the Performance API to track resource loading
-3. Generating ffmpeg commands with proper formatting
-4. Managing clipboard operations for easy command copying
+- `storage` — extension state.
+- Host access to `*.sharepoint.com`, `*.svc.ms`, `teams.microsoft.com`, and
+  `teams.cloud.microsoft` — to read the recording pages and fetch the media
+  segments and decryption key.
 
-## Contributing
+## Credits
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+The download/decrypt/mux pipeline is adapted from
+[brendangooden/ms-teams-sharepoint-downloader](https://github.com/brendangooden/ms-teams-sharepoint-downloader)
+(MIT License, © 2025 Brendan Gooden).
 
 ## Disclaimer
 
-This tool is meant for personal use to download your own Teams meeting recordings. Please ensure you have the necessary permissions before downloading any content.
+This tool is for downloading recordings **you are authorized to access**. Make
+sure you have permission before downloading any content.
