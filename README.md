@@ -25,7 +25,6 @@ Version 2.1 handles the whole pipeline itself:
 - Remuxes them into a single seekable MP4, saved straight to your Downloads.
 - A **⬇ Download recording** button now appears automatically on Stream pages —
   no need to open the toolbar popup.
-- `ffmpeg` and `yt-dlp` clipboard commands are kept as fallbacks.
 - Security hardening: origin-scoped `postMessage` handoff and a safer
   `subprocess` call in the Python helper.
 
