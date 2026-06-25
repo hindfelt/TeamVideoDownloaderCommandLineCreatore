@@ -123,9 +123,7 @@ Install the published listing, then pin it from the extensions menu.
 
 ## Credits
 
-The download/decrypt/mux pipeline is adapted from
-[brendangooden/ms-teams-sharepoint-downloader](https://github.com/brendangooden/ms-teams-sharepoint-downloader)
-(MIT License, © 2025 Brendan Gooden).
+To Brendan Gooden and [brendangooden/ms-teams-sharepoint-downloader](https://github.com/brendangooden/ms-teams-sharepoint-downloader) for inspiration of revamp.  (MIT License, © 2025 Brendan Gooden).
 
 ## Disclaimer
 
