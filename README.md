@@ -6,6 +6,32 @@ encryption Microsoft now applies to the media segments. No command line required
 for the common case; an ffmpeg/yt-dlp fallback and a standalone Python script are
 included for the cases where it isn't enough.
 
+## What's new in 2.1
+
+**Recordings now download entirely in the browser — no ffmpeg or terminal needed.**
+
+**Why this update was needed:** Microsoft rolled out a change
+("TempAuthRemoval") to how Stream recordings are protected. The media is now
+**AES-128 encrypted**, and the CDN requires a short-lived auth token
+(`x-spopactoken`) that the player sends from a service worker — something a plain
+`ffmpeg`/`yt-dlp` command can't supply. The previous "copy the ffmpeg command"
+flow therefore started returning **401 Unauthorized** on many tenants.
+
+Version 2.1 handles the whole pipeline itself:
+
+- Captures the DASH manifest and the `x-spopactoken` directly from the player.
+- Downloads the audio/video segments in parallel, with automatic retry/back-off.
+- Decrypts the AES-128-CBC segments in-browser via the Web Crypto API.
+- Remuxes them into a single seekable MP4, saved straight to your Downloads.
+- A **⬇ Download recording** button now appears automatically on Stream pages —
+  no need to open the toolbar popup.
+- `ffmpeg` and `yt-dlp` clipboard commands are kept as fallbacks.
+- Security hardening: origin-scoped `postMessage` handoff and a safer
+  `subprocess` call in the Python helper.
+
+Recordings protected with hard DRM (Widevine/PlayReady/FairPlay) still cannot be
+downloaded client-side.
+
 ## What it does
 
 Modern Teams/Stream recordings are served as MPEG-DASH with **DASH-SEA
