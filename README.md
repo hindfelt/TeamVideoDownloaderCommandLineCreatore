@@ -2,9 +2,8 @@
 
 A Chrome (Manifest V3) extension that downloads your Microsoft Teams / SharePoint
 Stream meeting recordings **entirely in the browser** — including the AES-128
-encryption Microsoft now applies to the media segments. No command line required
-for the common case; a standalone Python script (`destream.py`) is included as a
-manual fallback for the cases where it isn't enough.
+encryption Microsoft now applies to the media segments. No command line, no
+ffmpeg, no manual steps.
 
 ## What's new in 2.1
 
@@ -25,8 +24,8 @@ Version 2.1 handles the whole pipeline itself:
 - Remuxes them into a single seekable MP4, saved straight to your Downloads.
 - A **⬇ Download recording** button now appears automatically on Stream pages —
   no need to open the toolbar popup.
-- Security hardening: origin-scoped `postMessage` handoff and a safer
-  `subprocess` call in the Python helper.
+- Security hardening: origin-scoped `postMessage` handoff between the page and
+  the content script.
 
 Recordings protected with hard DRM (Widevine/PlayReady/FairPlay) still cannot be
 downloaded client-side.
@@ -56,16 +55,12 @@ This extension handles the whole pipeline:
 When a recording is detected, a floating **⬇ Download recording** button appears
 in the bottom-right of the page with live progress.
 
-### Fallback
+### Not in the published build
 
-`destream.py` is a standalone Python downloader/decryptor for fully manual use —
-it parses a saved manifest, fetches the key, downloads + decrypts the segments,
-and muxes with ffmpeg. See the header of that file for usage.
-
-> The repo also contains `popup.*` and `background.js` with `ffmpeg`/`yt-dlp`
-> command-builder helpers and auth-header capture. These are **not part of the
-> published build** (not wired into `manifest.json`); the published extension is
-> the in-page overlay path only.
+The repo also contains `popup.*` and `background.js` with `ffmpeg`/`yt-dlp`
+command-builder helpers and auth-header capture. These are **not wired into
+`manifest.json`** and aren't part of the published extension, which is the
+in-page overlay path only.
 
 ## Limitations
 
@@ -114,8 +109,7 @@ Also in the repo, but not part of the published build:
 ```
 ├── background.js     # service worker: manifest URL + auth header/cookie capture
 ├── popup.html        # toolbar popup UI
-├── popup.js          # ffmpeg / yt-dlp command builders
-└── destream.py       # standalone Python downloader/decryptor (manual fallback)
+└── popup.js          # ffmpeg / yt-dlp command builders
 ```
 
 ## Permissions
