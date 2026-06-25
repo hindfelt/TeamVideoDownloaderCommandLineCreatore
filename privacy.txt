@@ -1,21 +1,29 @@
 Privacy Policy
-Effective Date: [Insert Date]
+Effective Date: 2026-06-25
 
 1. Introduction
-This privacy policy explains how our Chrome extension (the "Extension") handles user data. We take privacy seriously and are committed to ensuring transparency regarding data collection and usage.
+This privacy policy explains how the "Teams Recording Downloader" Chrome extension (the "Extension") handles data.
 
 2. Data Collection and Usage
-Our Extension does not collect, store, or transmit any personal data. The only function of the Extension is to extract the URL of the website a user visits and copy it to their local clipboard. This allows users to paste the URL into other applications.
+The Extension does not collect, store, or transmit any personal data. It does not send any data to the developer, to third parties, or to any external server operated by the developer.
+
+The Extension's only function is to let a signed-in user download a Microsoft Teams / SharePoint Stream meeting recording that they are already authorized to view. To do this, it reads the recording's media manifest from the page and downloads and decrypts the audio/video segments directly from Microsoft's own servers (the same servers the recording is streamed from). The resulting MP4 file is assembled and saved locally to the user's own device.
 
 3. Data Storage and Sharing
-The Extension does not store any data.
-The Extension does not send any data to external servers, third parties, or cloud storage.
-All operations are performed locally on the user's device.
+- The Extension does not store user data.
+- The Extension does not send any data to external servers, third parties, or cloud storage operated by the developer.
+- All processing (download, decryption, and muxing) is performed locally in the user's browser.
+- The only network requests made are to Microsoft's SharePoint/Stream endpoints (*.sharepoint.com, *.svc.ms) to retrieve the recording the user is already signed in to access.
+
 4. Permissions
-The Extension requires minimal permissions to function properly. The activeTab permission is used to read the URL of the currently active tab so it can be copied to the clipboard.
+The Extension requests host access only to Microsoft's Teams and SharePoint/Stream domains (*.sharepoint.com, *.svc.ms, teams.microsoft.com, teams.cloud.microsoft) so it can run on recording pages and fetch the media segments and decryption key needed to save the recording. It requests no other API permissions.
 
 5. Security
-Since our Extension does not collect or transmit any data, there is no risk of data breaches or leaks related to its functionality.
+Because the Extension does not collect or transmit data to the developer or to third parties, there is no developer-side storage that could be breached. Recordings are handled only on the user's own device.
 
 6. Changes to This Privacy Policy
-We may update this Privacy Policy from time to time. If there are any significant changes, we will update the Effective Date above.
+We may update this Privacy Policy from time to time. Significant changes will be reflected by updating the Effective Date above.
+
+7. Contact
+Questions can be raised via the project's GitHub repository:
+https://github.com/hindfelt/TeamVideoDownloaderCommandLineCreatore
