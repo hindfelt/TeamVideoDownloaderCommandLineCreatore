@@ -127,7 +127,7 @@ fetch the media segments and decryption key.
 
 ## Credits
 
-To Brendan Gooden and [brendangooden/ms-teams-sharepoint-downloader](https://github.com/brendangooden/ms-teams-sharepoint-downloader) for inspiration of revamp.  (MIT License, © 2025 Brendan Gooden).
+To Brendan Gooden for revamo inspiration and if you need more bells and whistles I would with a warm heart recommend you to look at 👉[brendangooden/ms-teams-sharepoint-downloader](https://github.com/brendangooden/ms-teams-sharepoint-downloader)  (MIT License, © 2025 Brendan Gooden).
 
 ## Disclaimer
 
