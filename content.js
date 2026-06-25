@@ -418,13 +418,25 @@
     }
   }
 
-  // Surface the overlay button in the top frame immediately, before any
-  // manifest is captured. Clicking it before playback prompts the user to play
-  // the recording first; once a manifest is seen (here or in a child frame) the
-  // button is wired to the real download.
+  // Only the SharePoint Stream player page (…/_layouts/15/stream.aspx, also on
+  // sharepoint-df.com) gets the instant placeholder — we don't want a floating
+  // button on every SharePoint doc/list. Everywhere else the button still
+  // appears the moment a recording is actually detected (capture-based reveal).
+  function isStreamPage() {
+    try {
+      return /https:\/\/[^/]*sharepoint(?:-df)?\.com\/.*\/_layouts\/15\/stream\.aspx/i.test(location.href);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // Surface the overlay button in the top frame immediately on Stream pages,
+  // before any manifest is captured. Clicking it before playback prompts the
+  // user to play the recording first; once a manifest is seen (here or in a
+  // child frame) the button is wired to the real download.
   function ready() {
     injectButton();
-    if (isTopFrame) showButton();
+    if (isTopFrame && isStreamPage()) showButton();
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', ready);
