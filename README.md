@@ -3,8 +3,8 @@
 A Chrome (Manifest V3) extension that downloads your Microsoft Teams / SharePoint
 Stream meeting recordings **entirely in the browser** — including the AES-128
 encryption Microsoft now applies to the media segments. No command line required
-for the common case; an ffmpeg/yt-dlp fallback and a standalone Python script are
-included for the cases where it isn't enough.
+for the common case; a standalone Python script (`destream.py`) is included as a
+manual fallback for the cases where it isn't enough.
 
 ## What's new in 2.1
 
@@ -94,8 +94,7 @@ Install the published listing, then pin it from the extensions menu.
 
 1. Open a Teams/SharePoint Stream recording and **play it for a few seconds** so
    the player requests the manifest.
-2. Click the **⬇ Download recording** button that appears bottom-right (or use the
-   toolbar popup's copy buttons as a fallback).
+2. Click the **⬇ Download recording** button that appears bottom-right.
 3. Watch the progress; the `.mp4` lands in your Downloads when muxing finishes.
 
 ## File structure
